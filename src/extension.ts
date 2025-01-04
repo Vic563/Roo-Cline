@@ -1,11 +1,14 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import delay from "delay"
 import * as vscode from "vscode"
 import { ClineProvider } from "./core/webview/ClineProvider"
 import { createClineAPI } from "./exports"
 import "./utils/path" // necessary to have access to String.prototype.toPosix
 import { DIFF_VIEW_URI_SCHEME } from "./integrations/editor/DiffViewProvider"
+import { OpenAiHandler } from "./api/providers/openai"
+import { getAudioInput } from "./utils/audio"
+
+// The module 'vscode' contains the VS Code extensibility API
+// Import the module and reference it with the alias vscode in your code below
 
 /*
 Built using https://github.com/microsoft/vscode-webview-ui-toolkit
@@ -105,6 +108,18 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand("roo-cline.historyButtonClicked", () => {
 			sidebarProvider.postMessageToWebview({ type: "action", action: "historyButtonClicked" })
+		}),
+	)
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand("roo-cline.speechToText", async () => {
+			const audioInput = await getAudioInput()
+			const openAiHandler = new OpenAiHandler({
+				openAiApiKey: "YOUR_OPENAI_API_KEY",
+				openAiBaseUrl: "https://api.openai.com/v1",
+			})
+			const text = await openAiHandler.convertAudioToText(audioInput)
+			sidebarProvider.postMessageToWebview({ type: "speechToText", text })
 		}),
 	)
 
