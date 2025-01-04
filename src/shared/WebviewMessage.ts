@@ -50,6 +50,7 @@ export interface WebviewMessage {
 		| "deleteMessage"
 		| "terminalOutputLineLimit"
 		| "mcpEnabled"
+		| "speechToText"
 	text?: string
 	disabled?: boolean
 	askResponse?: ClineAskResponse
