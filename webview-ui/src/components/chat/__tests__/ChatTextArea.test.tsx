@@ -180,4 +180,42 @@ describe('ChatTextArea', () => {
       expect(setInputValue).toHaveBeenCalledWith('Enhanced test prompt');
     });
   });
+
+  describe('speech-to-text button', () => {
+    it('should show speech-to-text button', () => {
+      render(<ChatTextArea {...defaultProps} />);
+      const speechButton = screen.getByRole('button', { name: /speech to text/i });
+      expect(speechButton).toBeInTheDocument();
+    });
+
+    it('should be disabled when textAreaDisabled is true', () => {
+      render(<ChatTextArea {...defaultProps} textAreaDisabled={true} />);
+      const speechButton = screen.getByRole('button', { name: /speech to text/i });
+      expect(speechButton).toHaveClass('disabled');
+    });
+
+    it('should send message to start speech-to-text when clicked', () => {
+      render(<ChatTextArea {...defaultProps} />);
+      const speechButton = screen.getByRole('button', { name: /speech to text/i });
+      fireEvent.click(speechButton);
+      expect(mockPostMessage).toHaveBeenCalledWith({ type: 'speechToText' });
+    });
+
+    it('should update input value when receiving speech-to-text result', () => {
+      const setInputValue = jest.fn();
+      render(<ChatTextArea {...defaultProps} setInputValue={setInputValue} />);
+
+      // Simulate receiving speech-to-text message
+      window.dispatchEvent(
+        new MessageEvent('message', {
+          data: {
+            type: 'speechToText',
+            text: 'Speech to text result',
+          },
+        })
+      );
+
+      expect(setInputValue).toHaveBeenCalledWith(expect.stringContaining('Speech to text result'));
+    });
+  });
 });

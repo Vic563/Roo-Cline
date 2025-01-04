@@ -455,6 +455,21 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 			[updateCursorPosition],
 		)
 
+		const handleSpeechToText = useCallback(() => {
+			vscode.postMessage({ type: "speechToText" })
+		}, [])
+
+		useEffect(() => {
+			const messageHandler = (event: MessageEvent) => {
+				const message = event.data
+				if (message.type === 'speechToText' && message.text) {
+					setInputValue((prevValue) => prevValue + message.text)
+				}
+			}
+			window.addEventListener('message', messageHandler)
+			return () => window.removeEventListener('message', messageHandler)
+		}, [setInputValue])
+
 		return (
 			<div style={{
 				padding: "10px 15px",
@@ -659,6 +674,7 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 				      </div>
 				    )}
 				    <span className={`input-icon-button ${shouldDisableImages ? "disabled" : ""} codicon codicon-device-camera`} onClick={() => !shouldDisableImages && onSelectImages()} style={{ fontSize: 16.5 }} />
+				    <span className={`input-icon-button ${textAreaDisabled ? "disabled" : ""} codicon codicon-mic`} onClick={() => !textAreaDisabled && handleSpeechToText()} style={{ fontSize: 16.5 }} />
 				    <span className={`input-icon-button ${textAreaDisabled ? "disabled" : ""} codicon codicon-send`} onClick={() => !textAreaDisabled && onSend()} style={{ fontSize: 15 }} />
 				  </span>
 				</div>
